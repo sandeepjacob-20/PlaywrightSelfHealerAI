@@ -41,19 +41,19 @@ Set your Gemini API key as an environment variable before running the tests:
 #### Linux/macOS
 
 ```bash
-export GEMINI_API_KEY="your_api_key_here"
+export API_KEY="your_api_key_here"
 ```
 
 #### Windows (Command Prompt)
 
 ```cmd
-set GEMINI_API_KEY=your_api_key_here
+set API_KEY=your_api_key_here
 ```
 
 #### Windows (PowerShell)
 
 ```powershell
-$env:GEMINI_API_KEY="your_api_key_here"
+$env:API_KEY="your_api_key_here"
 ```
 
 Alternatively for linux, You can add the API key by running the set_api_key.bash script:
@@ -75,7 +75,7 @@ Run your tests as you normally would. On encountering an error:
 ### Example
 
 ```bash
-python run_tests.py
+python automation.py
 ```
 
 Fixed files are saved in the ./fixed_files/ directory.
