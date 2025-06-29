@@ -1,0 +1,2 @@
+pytest-playwright
+google-generativeai
