@@ -20,7 +20,7 @@ This project is a test automation framework using [Playwright](https://playwrigh
 
 ```bash
 git clone https://github.com/sandeepjacob-20/PlaywrightSelfHealerAI.git
-cd your-repo-name
+cd PlaywrightSelfHealerAI
 ```
 ### 2. Install Python Requirements
 
