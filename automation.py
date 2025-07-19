@@ -2,7 +2,7 @@ from playwright.sync_api import sync_playwright
 import traceback
 from llm_module import llm_caller
 
-inference_mode = 'local'
+inference_mode = 'endpoint' # or 'local', depending on your setup
 
 try:
     with sync_playwright() as p:

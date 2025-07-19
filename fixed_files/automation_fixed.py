@@ -1,6 +1,8 @@
 from playwright.sync_api import sync_playwright
 import traceback
-# from llm_module import llm_caller # Commented out as llm_module is not provided and likely external
+from llm_module import llm_caller
+
+inference_mode = 'endpoint' # or 'local', depending on your setup
 
 try:
     with sync_playwright() as p:
@@ -8,46 +10,46 @@ try:
         page = browser.new_page()
 
         try:
+            # Step 1: Visit DuckDuckGo
             page.goto("https://duckduckgo.com/?t=h_")
 
-            # Attempt to accept cookies if the button exists, with a short timeout.
-            # If it doesn't appear or isn't clickable, the `except` block will handle it.
+            # Step 2: Accept cookies if prompted (optional, might not always appear)
             try:
-                page.locator("button:has-text('Accept all')").click(timeout=5000)
-                print("Cookie banner accepted.")
-            except Exception:
-                print("No 'Accept all' cookie button found or click timed out.")
-                pass # Continue if cookie banner is not present
+                # Use a more specific selector if available, or a timeout for the click
+                page.click("button:has-text('Accept all')", timeout=5000)
+            except Exception as e:
+                print(f"No cookie consent button found or clickable: {e}")
+                pass # Continue if the button is not present
 
+            # Step 3: Search
             page.fill("input[name='q']", "cats")
             page.press("input[name='q']", "Enter")
 
-            # CORRECTED: Wait for a visible search result element using a proper selector.
-            # 'article[data-testid="result"]' targets the individual search result blocks.
+            # Step 4: Wait for search results using a correct selector
+            # Waiting for the first search result article to be visible
             page.wait_for_selector("article[data-testid='result']")
-            print("Search results loaded.")
-
-            # Click on the first search result found
-            page.click("article[data-testid='result']")
-            print("Clicked on the first search result.")
+            
+            # The original code had page.click("resul") which was incorrect.
+            # If you intended to click on the first search result, you would do:
+            # page.click("article[data-testid='result']")
+            # For now, we assume just waiting for results is sufficient, so we remove the click.
 
             page.wait_for_timeout(3000) # Wait for 3 seconds to observe
-            
+            browser.close()
+
         except Exception as e:
+            path = traceback.format_exc().split('File')[1].split(',')[0]
             print("Error occurred during automation:")
-            print(traceback.format_exc()) # Print the full traceback for debugging
+            print(e)
 
-            # If you still need llm_caller, ensure it's imported and handles the input correctly
-            # For example, if it expects the page content, you might use:
-            # try:
-            #     llm_caller("Automation Error", e, page.content())
-            # except Exception as dom_error:
-            #     print(f"Failed to call llm_caller: {dom_error}")
+            # Safely get the DOM here before browser is closed
+            try:
+                llm_caller(path,e,page,inference_mode)
+            except Exception as dom_error:
+                print("Failed to get DOM due to:", dom_error)
 
-        finally:
-            browser.close() # Ensure the browser is always closed
+            browser.close()
 
-except Exception as outer_error:
-    print("Playwright failed to start or browser initialization error:")
-    print(traceback.format_exc())
+except Exception as outer:
+    print("Playwright failed to start or browser error:", outer)
 

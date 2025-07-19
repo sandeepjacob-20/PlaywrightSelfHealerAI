@@ -4,10 +4,11 @@ from pathlib import Path
 # using the local ollama model
 import ollama
 
-# genai.configure(api_key=os.environ["API_KEY"])
+# Ensure the API key is set for Google Generative AI
+genai.configure(api_key=os.environ["API_KEY"])
 
 model = genai.GenerativeModel('gemini-2.5-flash')
-
+   
 def generator(error,file_data,html, llm_mode):
     if llm_mode == 'endpoint':
         response = model.generate_content(f"can u find a solution to the given issue\n{error}\nthe file is {file_data}\n\nhte html DOM is {html}\n\nnote: make it very brief and rewrite the whole code")
@@ -25,22 +26,35 @@ def path_prep(path):
     path = Path(path.strip('" '))
     return path
 
-def html_extractor(page):
+def html_extractor(page,error,llm_mode):
     html = page.content()
+    if llm_mode == 'endpoint':
+        response = model.generate_content(f"based on the error given below\n{error}\nCan u extract the required html DOM from {html}\n\nnote: i want only the html DOM in the response and nothing else\n\nmake sure to wrap the html DOM in ```html\n and ```")
+        html = response.text.split("```html\n")[1].split("```")[0]
     return html
+    
+def get_file_name(file_path):
+    if os.name == 'nt':
+        return file_path.split('\\')[-1].split('.')[0]
+    else:
+        return file_path.split('/')[-1].split('.')[0]      
 
 def llm_caller(file_path, error, html, llm_mode):
     # print("Evaluating issue with LLM")
     path = path_prep(file_path)
-    file_name = file_path.split('/')[-1].split('.')[0]
-    html = html_extractor(html)
+    file_name = get_file_name(file_path)
+    html = html_extractor(html,error,llm_mode)
     print("--- Invoking LLM")
     with open(path,"r") as f:
         file_data = f.read()
     code = generator(error,file_data,html, llm_mode)
     print(code)
     print(f"--- Rewriting error file {file_path}")
-    with open(f"./fixed_files/{file_name}_fixed.py","w") as f:
-        f.write(code)
-    print("--- File modified and saved in fixed_files folder.")
-    return True
+    try:
+        with open(f"./fixed_files/{file_name}_fixed.py","w") as f:
+            f.write(code)
+        print("--- File modified and saved in fixed_files folder.")
+        return True
+    except Exception as e:
+        print(f"--- Failed to save the modified file: {e}")
+        return False
