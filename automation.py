@@ -2,6 +2,8 @@ from playwright.sync_api import sync_playwright
 import traceback
 from llm_module import llm_caller
 
+inference_mode = 'local'
+
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
@@ -35,7 +37,7 @@ try:
 
             # Safely get the DOM here before browser is closed
             try:
-                llm_caller(path,e,page)
+                llm_caller(path,e,page,inference_mode)
             except Exception as dom_error:
                 print("Failed to get DOM due to:", dom_error)
 
