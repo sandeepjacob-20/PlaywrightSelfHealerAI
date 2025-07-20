@@ -1,9 +1,13 @@
 from playwright.sync_api import sync_playwright
 import traceback
 from llm_module import llm_caller
+import sys
 
-inference_mode = 'endpoint' # or 'local', depending on your setup
-
+try:
+    inference_mode = sys.argv[1] # need to pass 'endpoint' or 'local' as a command line argument
+except:
+    print("Inference mode (local, endpoint) not provided. Defaulting to 'endpoint'.")
+    inference_mode = 'endpoint'
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
