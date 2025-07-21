@@ -3,8 +3,7 @@ import os
 from pathlib import Path
 # using the local ollama model
 import ollama
-os.environ["API_KEY"] = "your_ollama_api_key"  # Set your Ollama API key if needed
-
+os.environ["API_KEY"] = "wdeff"
 # Ensure the API key is set for Google Generative AI
 genai.configure(api_key=os.environ["API_KEY"])
 
@@ -13,8 +12,10 @@ model = genai.GenerativeModel('gemini-2.5-flash')
 def generator(error,file_data,html, llm_mode):
     message = f"can u find a solution to the given issue\n{error}\nthe file is {file_data}\n\nhte html DOM is {html}\n\nnote: make it very brief and rewrite the whole code"
     if llm_mode == 'endpoint':
+
         response = model.generate_content(message)
         return response.text.split("```python\n")[1].split("```")[0]
+    
     elif llm_mode == 'local':
         
         response = ollama.generate(
@@ -52,6 +53,7 @@ def llm_caller(file_path, error, html, llm_mode):
     # print("Evaluating issue with LLM")
     path = path_prep(file_path)
     file_name = get_file_name(file_path)
+    print("--- Extracting HTML information")
     html = html_extractor(html,error,llm_mode)
     print("--- Invoking LLM")
     with open(path,"r") as f:
