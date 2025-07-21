@@ -5,6 +5,7 @@ import sys
 
 try:
     inference_mode = sys.argv[1] # need to pass 'endpoint' or 'local' as a command line argument
+    print(f"Inference mode set to: {inference_mode}")
 except:
     print("Inference mode (local, endpoint) not provided. Defaulting to 'endpoint'.")
     inference_mode = 'endpoint'
